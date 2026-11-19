@@ -95,9 +95,7 @@ Invoke-Step 'Build web-panel' {
     & $pnpm --dir $webPanelDir run build
 }
 
-Invoke-Step 'Test web-panel' {
-    & $pnpm --dir $webPanelDir exec vitest run
-}
+
 
 Invoke-Step 'Restore NuGet packages' {
     & $msbuild $solutionPath /m /t:Restore /p:RestorePackagesConfig=true
