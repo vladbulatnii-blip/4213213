@@ -4,16 +4,21 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag or version to release'
+        required: true
+        type: string
 
 jobs:
   publish-release:
-    if: github.repository == 'k1tbyte/Wand-Enhancer'
     runs-on: windows-latest
     permissions:
       contents: write
 
     env:
-      RELEASE_VERSION: ${{ github.ref_name }}
+      RELEASE_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
 
     steps:
       - uses: actions/checkout@v5
@@ -45,11 +50,11 @@ jobs:
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
+          name: ${{ env.RELEASE_VERSION }}
+          tag_name: ${{ env.RELEASE_VERSION }}
           body_path: release-notes.md
           files: CHANGELOG.md
           fail_on_unmatched_files: true
           # RC tags must not replace the latest stable release.
-          prerelease: ${{ contains(github.ref_name, '-') }}
-          make_latest: ${{ !contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(env.RELEASE_VERSION, '-') }}
+          make_latest: ${{ !contains(env.RELEASE_VERSION, '-') }}
